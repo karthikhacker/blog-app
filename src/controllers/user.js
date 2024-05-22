@@ -1,6 +1,7 @@
 import User from '../models/user.js';
 import AppError from '../utils/appError.js';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 export const signup = async (req, res, next) => {
     try {
@@ -16,9 +17,11 @@ export const signup = async (req, res, next) => {
             photo
         });
         const savedUser = await newUser.save();
+        const token = jwt.sign({ id: savedUser._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES });
         res.status(201).json({
             message: 'User signup successfull',
             data: {
+                token,
                 savedUser
             }
         })

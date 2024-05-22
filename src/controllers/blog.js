@@ -1,5 +1,6 @@
 import Blog from "../models/blog.js";
 import Category from '../models/categories.js';
+import APIFeature from "../utils/apiFeatures.js";
 import AppError from "../utils/appError.js";
 
 export const createBlog = async (req, res, next) => {
@@ -11,7 +12,7 @@ export const createBlog = async (req, res, next) => {
             category: category._id,
             description,
             blogImage,
-            author
+            author: req.user._id
         })
         const savedBlog = await blog.save();
         category.blogs.push(savedBlog._id);
@@ -34,10 +35,14 @@ export const blogImageUpload = (req, res) => {
     }
 }
 
-export const blogs = async (req, res) => {
+export const blogs = async (req, res, next) => {
     try {
-        const blogs = await Blog.find();
-        res.status(200).json({ length: blogs.length, data: blogs })
+        const findQuery = Blog.find().populate('author', '-__v -role -email -photo')
+        const feature = new APIFeature(findQuery, req.query)
+            .filter()
+            .paginate()
+        const blogs = await feature.query;
+        res.status(200).json({ results: blogs.length, data: blogs })
     } catch (error) {
         res.status(400).json(error)
     }
@@ -45,7 +50,9 @@ export const blogs = async (req, res) => {
 
 export const blog = async (req, res, next) => {
     try {
-        const blog = await Blog.findById({ _id: req.params.id }).populate('category', '-_id -__v -blogs');
+        const blog = await Blog.findById({ _id: req.params.id })
+            .populate('category', '-_id -__v -blogs')
+            .populate('user', '-__v -role -email -photo')
         if (!blog) {
             return next(new AppError('Not found', 404))
         }

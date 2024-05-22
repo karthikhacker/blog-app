@@ -1,11 +1,12 @@
 import express from 'express';
 import { createBlog, blog, blogs, blogImageUpload, updateBlog, deleteBlog } from '../controllers/blog.js';
 import upload from '../utils/multerConfig.js';
+import { authMiddleware, isAdmin } from '../middleware/authMiddleware.js';
 const router = express.Router();
-router.post('/blog/:catId', createBlog);
+router.post('/blog/:catId', authMiddleware, createBlog);
 router.post('/blog/image', upload.array('blog-image', 5), blogImageUpload);
 router.get('/blogs', blogs);
 router.get('/blog/:id', blog);
 router.put('/blog/:id', updateBlog);
-router.delete('/blog/:id', deleteBlog);
+router.delete('/blog/:id', authMiddleware, isAdmin, deleteBlog);
 export default router;

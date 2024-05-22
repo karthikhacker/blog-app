@@ -16,6 +16,8 @@ const handleValidationError = err => {
     const message = `Invalid input ${errors.join(', ')}`;
     return new AppError(message, 400);
 }
+const handleTokenExpiryError = err => new AppError('Token expired,please login again.', 401)
+const handleJsonWebTokenError = err => new AppError('Invalid token, please login', 401);
 const devError = (err, res) => {
     res.status(err.statusCode).json({
         status: err.status,
@@ -31,6 +33,7 @@ const prodError = (err, res) => {
             message: err.message
         })
     } else {
+        console.log(err);
         res.status(500).json({
             status: 'error',
             message: 'Something went wrong.'
@@ -49,6 +52,8 @@ export const errController = (err, req, res, next) => {
         if (err.name === 'CastError') err = handleCastError(err);
         if (err.code === 11000) err = handleDuplicateFields(err);
         if (err.name === 'ValidationError') err = handleValidationError(err);
+        if (err.name === 'JsonWebTokenError') err = handleJsonWebTokenError(err);
+        if (err.name === 'TokenExpiredError') err = handleTokenExpiryError(err);
         prodError(err, res)
     }
 

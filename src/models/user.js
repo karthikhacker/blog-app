@@ -13,10 +13,25 @@ const UserSchema = new mongoose.Schema({
     password: {
         type: String,
         min: [6, 'Password minimum 6 character'],
-        required: [true, 'Password is required']
+        required: [true, 'Password is required'],
+        select: false
     },
     photo: {
         type: String
+    },
+    role: {
+        type: String,
+        enum: ['user', 'admin'],
+        default: 'user'
+    },
+    passwordResetExpires: Date,
+    password_reset_token: {
+        type: String
+    },
+    active: {
+        type: Boolean,
+        default: true,
+        select: false
     }
 })
 
