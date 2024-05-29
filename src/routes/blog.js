@@ -4,7 +4,7 @@ import upload from '../utils/multerConfig.js';
 import { authMiddleware, isAdmin } from '../middleware/authMiddleware.js';
 const router = express.Router();
 router.post('/blog/:catId', authMiddleware, createBlog);
-router.post('/blog/image', upload.array('blog-image', 5), blogImageUpload);
+router.post('/blog/image', upload.array('image-file', 5), blogImageUpload);
 router.get('/blogs', blogs);
 router.get('/blog/:id', blog);
 router.put('/blog/:id', updateBlog);

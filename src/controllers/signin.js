@@ -21,7 +21,8 @@ export const login = async (req, res, next) => {
     createCookie(res, token);
     res.status(201).json({
         message: 'Login successfull',
-        token
+        token,
+        user
     })
 }
 
