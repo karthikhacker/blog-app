@@ -4,5 +4,5 @@ export const createCookie = (res, token) => {
         httpOnly: true
     }
     if (process.env.NODE_ENV === 'production') options.secure = true;
-    res.cookie('jwt', token, options)
+    res.cookie('access_token', token, options)
 }
