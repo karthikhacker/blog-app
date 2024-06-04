@@ -1,4 +1,5 @@
 import express from 'express';
+import cookieParser from "cookie-parser";
 import cors from 'cors';
 import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
@@ -18,6 +19,7 @@ const limiter = rateLimit({
     message: 'Too many requests,Try again'
 })
 app.use(express.json());
+app.use(cookieParser());
 app.use(mongoSanitize())
 app.use(cors());
 app.use(limiter);

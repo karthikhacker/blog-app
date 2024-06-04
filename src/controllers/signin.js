@@ -111,3 +111,8 @@ export const deleteMe = async (req, res, next) => {
         next(next)
     }
 }
+
+export const logout = (req, res) => {
+    res.clearCookie('access_token');
+    return res.status(200).json({ message: "Logout successfull" });
+}
