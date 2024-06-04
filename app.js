@@ -21,7 +21,7 @@ const limiter = rateLimit({
 app.use(express.json());
 app.use(cookieParser());
 app.use(mongoSanitize())
-app.use(cors());
+app.use(cors({ origin: ['http://localhost:3000'], credentials: true }));
 app.use(limiter);
 app.use(helmet());
 app.use('/v1/api', BlogRoutes);
