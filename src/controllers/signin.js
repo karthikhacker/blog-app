@@ -6,7 +6,6 @@ import sendMail from '../utils/email.js';
 import { promisify } from 'util';
 import jwt from 'jsonwebtoken';
 import { filterObj } from '../utils/filterObj.js';
-import { createCookie } from '../utils/createCookie.js';
 
 export const login = async (req, res, next) => {
     const { email, password } = req.body;
@@ -17,11 +16,9 @@ export const login = async (req, res, next) => {
     if (!user) return next(new AppError('User not found', 404));
     const dbPassword = await bcrypt.compare(password, user.password);
     if (!dbPassword) return next(new AppError('Password didnt match', 401));
-    const token = createToken(user._id, process.env.JWT_SECRET, process.env.JWT_EXPIRES);
-    createCookie(res, token);
+    createToken(user._id, process.env.JWT_SECRET, process.env.JWT_EXPIRES, res);
     res.status(201).json({
         message: 'Login successfull',
-        token,
         user
     })
 }
@@ -112,7 +109,12 @@ export const deleteMe = async (req, res, next) => {
     }
 }
 
-export const logout = (req, res) => {
-    res.clearCookie('access_token');
-    return res.status(200).json({ message: "Logout successfull" });
+export const logout = (req, res, next) => {
+    try {
+        res.clearCookie('access_token');
+        return res.status(200).json({ message: "Logout successfull" });
+    } catch (error) {
+        next(error)
+    }
+
 }
