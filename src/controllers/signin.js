@@ -6,6 +6,7 @@ import sendMail from '../utils/email.js';
 import { promisify } from 'util';
 import jwt from 'jsonwebtoken';
 import { filterObj } from '../utils/filterObj.js';
+import { resetToken } from '../utils/resetToken.js';
 
 export const login = async (req, res, next) => {
     const { email, password } = req.body;
@@ -31,19 +32,16 @@ export const forgotPassword = async (req, res, next) => {
     try {
         const user = await User.findOne({ email: req.body.email });
         if (!user) return next(new AppError('User not found with this email', 404));
-        const token = createToken(user._id, process.env.JWT_PASSWORD_SECRET, process.env.JWT_PASSWORD_EXPIRES);
-        const restUrl = `http://localhost:4000/v1/api/reset/password/${token}`;
-        const message = `Password reset link sent to ${req.body.email}`
-        await sendMail({
-            email: req.body.email,
-            subject: 'Password reset link',
-            text: restUrl
-        })
-
+        const token = resetToken();
+        const msg = {
+            to: req.body.email,
+            from: process.env.SENDGRID_EMAIL,
+            subject: 'Password reset email',
+            html: `<h1>Password reset link</h1>`
+        }
+        sendMail(msg)
         await user.updateOne({ password_reset_token: token, passwordResetExpires: Date.now() + 10 * 60 * 1000 });
-        res.status(200).json({
-            message: `Password reset link sent to ${req.body.email}`,
-        })
+        res.status(200).json({ message: `Password reset link send to ${req.body.email}` })
     } catch (error) {
         next(error)
     }
@@ -99,7 +97,10 @@ export const updateMe = async (req, res, next) => {
         next(error)
     }
 }
+export const userImageUpload = (req, res) => {
+    res.status(200).json({ data: req.file })
 
+}
 export const deleteMe = async (req, res, next) => {
     try {
         await User.findByIdAndUpdate(req.user.id, { active: false });
